@@ -1,12 +1,21 @@
 from flask import Flask, render_template
 
+from wtfforms_fields import *
+
+# Configure app
 app = Flask(__name__)
 app.secret_key = 'replace later'
+
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
 
-    return render_template("index.html")
+    reg_form = RegistrationForm()
+    if reg_form.validate_on_submit():
+        return "Success!"
+
+
+    return render_template("index.html", form=reg_form)
 
 
 
