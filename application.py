@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, current_user, login_required, logout_user
 from wtfforms_fields import *
 
@@ -37,6 +37,8 @@ def index():
         db.session.add(user)
         db.session.commit()
 
+        flash('Regisetered Succesfully', 'success')
+
         return redirect(url_for('login'))
 
 
@@ -59,7 +61,8 @@ def login():
 
 def chat():
     if not current_user.is_authenticated:
-        return "Please Login first"
+        flash('Please login first', 'danger')
+        return redirect(url_for('login'))
 
     return "hello"
 
@@ -67,7 +70,8 @@ def chat():
 def logout():
 
     logout_user()
-    return "Logged out"
+    flash('Logged out Succesfully', 'success')
+    return redirect(url_for('login'))
 
 if __name__ == "__main__":
 
