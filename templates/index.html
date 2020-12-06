@@ -5,7 +5,8 @@
 {% block title %}Registration {% endblock %}
 
 {% block content %}
-    <h1>Get Started</h1>
+    <h2>Get Started</h2>
+    <p>First time here? Register to start using the app</p>
 
     <form action="{{url_for('index')}}", method="POST">
 
@@ -14,12 +15,16 @@
       {{ displayField(form.password, 'Password')}}
       {{ displayField(form.confirm_pswd, 'Retype Password')}}
 
-      <div>
-        {{form.submit_button}}
+      <div class="form-group">
+        <input type="submit" value="Create" class="btn btn_warning">
       </div>
 
       {{ form.csrf_token }}
 
     </form>
+
+    <hr>
+
+    <p>Already registered? <a href="{{ url_for('login' )}}">Login here</a></p>
 
 {% endblock %}

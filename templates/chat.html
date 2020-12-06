@@ -2,44 +2,81 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title></title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/chat_style.css') }}">
+
   </head>
   <body>
+    <!-- Flash error messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <p class=formError>{{ messages[0] }}</p>
+            {% endif %}
+        {% endwith %}
     <!-- Navigation Bar -->
-    <nav>
+    <div class="wrapper">
+        <!-- Nav bar start -->
+        <nav class="navbar navbar-expand-sm navbar-light fixed-top" style="background-color: #66a1ee">
 
-    </nav>
+            <div class="container-fluid">
+                <div id="show-sidebar-button" class="cursor-pointer">
+                    <i class="fas fa-plus-circle "></i>
+                    <span>Rooms</span>
+                </div>
+
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a id="logout-btn" class="nav-link" href="{{ url_for('logout') }}"><span style="color: #335177">Logout</span></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Nav bar end -->
 
     <div id="main-section">
       <!-- Room Selection -->
-        <nav id="sidebar">
-          <h4>ROOMS</h4>
-          {% for room in rooms%}
-            <p class="select-room">{{ room|title }}</p>
-          {% endfor %}
+      <!-- Sidebar start -->
+          <nav id="sidebar">
+              <h4>Rooms</h4>
+              {% for room in rooms %}
+                  <p id="{{ room|title }}" class="select-room cursor-pointer">{{ room|title }}</p>
+              {% endfor %}
+          </nav>
+          <!-- Sidebar end -->
 
-        </nav>
+          <!-- Rightside pannel start -->
+                  <div id="rightside-pannel">
 
-        <!-- Message Area -->
-        <div id="rightside-pannel">
-            <!-- Display message -->
-            <div id="display-message-section">
+                      <!-- Display message start-->
+                      <div id="display-message-section">
+                      </div>
+                      <!-- Display message end -->
 
-            </div>
-            <!-- Input message -->
-            <div id="input-area">
-                <input type="text" id="user_message" placeholder="Type here..." autocomplete="off">
-                <button type="button" id="send_message">SEND</button>
+                      <!-- Type message start -->
+                     <div id="input-area" class="input-group mb-3">
+                          <input type="text" id="user_message" class="form-control" placeholder="Type here..." aria-label="Type a message" aria-describedby="basic-addon2" autocomplete="off">
+                          <div class="input-group-append">
+                              <button id="send_message" class="btn btn-warning" type="button">SEND <i class="fas fa-paper-plane"></i></button>
+                          </div>
+                      </div>
+                      <!-- Type message end -->
+                  </div>
+                  <!-- Rightside pannel end -->
+              </div>
+              <!-- Main section end -->
+          </div>
+          <!-- Wrapper end -->
 
-            </div>
-
-        </div>
-
-    </div>
-
-      <script type="text/javascript">
-          const username = `{{ username|e}}`;
-      </script>
+      <span id="get-username">{{ username }}</span>
 
       <script src="{{ url_for('static', filename='scripts/chat_page.js')}}"></script>
 
@@ -47,5 +84,14 @@
 
       <script src="{{ url_for('static', filename='scripts/socketio.js')}}"></script>
 
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+      <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+
+      <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+
   </body>
+  
 </html>
