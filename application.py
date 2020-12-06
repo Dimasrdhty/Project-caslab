@@ -1,3 +1,4 @@
+import os
 from time import localtime, strftime
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, current_user, login_required, logout_user
@@ -7,10 +8,10 @@ from models import *
 
 # Configure app
 app = Flask(__name__)
-app.secret_key = 'replace later'
+app.secret_key =os.environ.get('SECRET')
 
 # Configure database
-app.config['SQLALCHEMY_DATABASE_URI']='postgres://wmfjnbbwgxwzyn:4c1f1d3dc292ef7315fe3bdfce93f5b070eb3b444b34830d3f0408aaf27e55ec@ec2-54-237-135-248.compute-1.amazonaws.com:5432/d2b54gvvqi9a4d'
+app.config['SQLALCHEMY_DATABASE_URI']=os.environ.get('DATABASE_URL')
 db = SQLAlchemy(app)
 
 #initialize Flask-SocketIO
@@ -97,4 +98,4 @@ def leave(data):
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    app.run()
