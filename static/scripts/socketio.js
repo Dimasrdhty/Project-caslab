@@ -1,96 +1,140 @@
 document.addEventListener('DOMContentLoaded', () => {
-  var socket = io();
 
-  const username = document.querySelector('#get-username').innerHTML;
+    // Connect to websocket
+    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-  let room = "Module 1";
-  joinRoom("Module 1");
+    // Retrieve username
+    const username = document.querySelector('#get-username').innerHTML;
 
-  socket.on('message', data => {
-    if (data.msg) {
-      const p = document.createElement('p');
-      const span_username = document.createElement('span');
-      const span_timestamp = document.createElement('span');
-      const br = document.createElement('br');
+    // Set default room
+    let room = "Lounge"
+    joinRoom("Lounge");
 
-      if (data.username == username) {
-          p.setAttribute("class", "my-msg");
-          span_username.innerHTML = data.username;
-          span_timestamp.innerHTML = data.time_stamp;
-          p.innerHTML = span_username.outerHTML + br.outerHTML + data.msg + br.outerHTML + span_timestamp.outerHTML;
-          document.querySelector('#display-message-section').append(p);
-      } else if (typeof data.username !== 'undefined') {
-          p.setAttribute("class", "other-username");
-          span_username.setAttribut("class", "other-username");
-          span_username.innerText = data.username;
-          span_timestamp.setAttribut("class", "timestamp");
-          span_timestamp.innerText = data.time_stamp;
-          p.innerHTML += span_username.outerHTML + br.outerHTML + data.msg + br.outerHTML + span_timestamp.outerHTML;
-          document.querySelector('#display-message-section').append(p);
-      } else {
-          printSysMsg(data.msg);
-      }
-    }
-    scrollDownChatWindow();
-  });
+    // Send messages
+    document.querySelector('#send_message').onclick = () => {
+        socket.emit('incoming-msg', {'msg': document.querySelector('#user_message').value,
+            'username': username, 'room': room});
 
-
-  document.querySelector('#send_message').onclick = () => {
-    socket.emit('incoming-msg', {'msg':  document.querySelector('#user_message').value, 'username': username, 'room': room});
-    document.querySelector('#user_message').value = '';
-  };
-
-
-  document.querySelectorAll('.select-room').forEach(p => {
-    p.onclick = () => {
-      let newRoom = p.innerHTML;
-      if (newRoom == room) {
-        msg = `You are already in ${room} room.`;
-        printSysMsg(msg);
-      } else {
-          leaveRoom(room);
-          joinRoom(newRoom);
-          room = newRoom;
-      }
+        document.querySelector('#user_message').value = '';
     };
-  });
 
-  document.querySelector('#logout-btn').onclick = () +> {
-    leaveRoom(room);
-  };
+    // Display all incoming messages
+    socket.on('message', data => {
 
-  function leaveRoom(room) {
-    socket.emit('leave', {'username': username, 'room': room});
-    document.querySelectorAll('.select-room').forEach((p => {
-      p.style.color = "black";
+        // Display current message
+        if (data.msg) {
+            const p = document.createElement('p');
+            const span_username = document.createElement('span');
+            const span_timestamp = document.createElement('span');
+            const br = document.createElement('br')
+            // Display user's own message
+            if (data.username == username) {
+                    p.setAttribute("class", "my-msg");
+
+                    // Username
+                    span_username.setAttribute("class", "my-username");
+                    span_username.innerText = data.username;
+
+                    // Timestamp
+                    span_timestamp.setAttribute("class", "timestamp");
+                    span_timestamp.innerText = data.time_stamp;
+
+                    // HTML to append
+                    p.innerHTML += span_username.outerHTML + br.outerHTML + data.msg + br.outerHTML + span_timestamp.outerHTML
+
+                    //Append
+                    document.querySelector('#display-message-section').append(p);
+            }
+            // Display other users' messages
+            else if (typeof data.username !== 'undefined') {
+                p.setAttribute("class", "others-msg");
+
+                // Username
+                span_username.setAttribute("class", "other-username");
+                span_username.innerText = data.username;
+
+                // Timestamp
+                span_timestamp.setAttribute("class", "timestamp");
+                span_timestamp.innerText = data.time_stamp;
+
+                // HTML to append
+                p.innerHTML += span_username.outerHTML + br.outerHTML + data.msg + br.outerHTML + span_timestamp.outerHTML;
+
+                //Append
+                document.querySelector('#display-message-section').append(p);
+            }
+            // Display system message
+            else {
+                printSysMsg(data.msg);
+            }
+
+
+        }
+        scrollDownChatWindow();
     });
-  }
 
-  function joinRoom(room) {
-    socket.emit('join', {'username': username, 'room': room});
+    // Select a room
+    document.querySelectorAll('.select-room').forEach(p => {
+        p.onclick = () => {
+            let newRoom = p.innerHTML
+            // Check if user already in the room
+            if (newRoom === room) {
+                msg = `You are already in ${room} room.`;
+                printSysMsg(msg);
+            } else {
+                leaveRoom(room);
+                joinRoom(newRoom);
+                room = newRoom;
+            }
+        };
+    });
 
-    //Highlight room
-    document.querySelector('#', CSS.escape(room)).style.color = "#ffc107";
-    document.querySelector('#', CSS.escape(room)).style.backgroundColor = "#white";
-    // Clear message area
-    document.querySelector('#display-message-section').innerHTML = '';
+    // Logout from chat
+    document.querySelector("#logout-btn").onclick = () => {
+        leaveRoom(room);
+    };
 
-    document.querySelector('#user_message').focus();
-  }
+    // Trigger 'leave' event if user was previously on a room
+    function leaveRoom(room) {
+        socket.emit('leave', {'username': username, 'room': room});
 
-  function scrollDownChatWindow() {
-    const chatWindow = document.querySelector("#display-message-section");
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
+        document.querySelectorAll('.select-room').forEach(p => {
+            p.style.color = "black";
+        });
+    }
 
-  function printSysMsg(msg) {
-    const p = document.createElement('p');
-    p.setAttribute("class", "system-msg");
-    p.innerHTML = msg;
-    document.querySelector('#display-message-section').append(p);
-    scrollDownChatWindow()
-    document.querySelector('#user_message').focus();
-  }
+    // Trigger 'join' event
+    function joinRoom(room) {
 
+        // Join room
+        socket.emit('join', {'username': username, 'room': room});
 
-})
+        // Highlight selected room
+        document.querySelector('#' + CSS.escape(room)).style.color = "#ffc107";
+        document.querySelector('#' + CSS.escape(room)).style.backgroundColor = "white";
+
+        // Clear message area
+        document.querySelector('#display-message-section').innerHTML = '';
+
+        // Autofocus on text box
+        document.querySelector("#user_message").focus();
+    }
+
+    // Scroll chat window down
+    function scrollDownChatWindow() {
+        const chatWindow = document.querySelector("#display-message-section");
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // Print system messages
+    function printSysMsg(msg) {
+        const p = document.createElement('p');
+        p.setAttribute("class", "system-msg");
+        p.innerHTML = msg;
+        document.querySelector('#display-message-section').append(p);
+        scrollDownChatWindow()
+
+        // Autofocus on text box
+        document.querySelector("#user_message").focus();
+    }
+});

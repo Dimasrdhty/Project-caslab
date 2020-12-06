@@ -1,37 +1,41 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, EqualTo, ValidationError
+
 from passlib.hash import pbkdf2_sha256
 from models import User
 
+
 def invalid_credentials(form, field):
-    """ Username and Password Checker """
+    """ Username and password checker """
 
-    password_entered = field.data
-    username_entered = form.username.data
+    password = field.data
+    username = form.username.data
 
-    # Check username is valid
-    user_data = User.query.filter_by(username=username_entered).first()
+    # Check username is invalid
+    user_data = User.query.filter_by(username=username).first()
     if user_data is None:
-        raise ValidationError("Username or Password is incorrect")
-    elif not pbkdf2_sha256.verify(password_entered, user_object.password):
-        raise ValidationError("Username or Password is incorrect")
+        raise ValidationError("Username or password is incorrect")
+
+    # Check password in invalid
+    elif not pbkdf2_sha256.verify(password, user_data.hashed_pswd):
+        raise ValidationError("Username or password is incorrect")
+
 
 class RegistrationForm(FlaskForm):
-    """ Registration Form """
+    """ Registration form"""
 
-    username = StringField('username', validators=[InputRequired(message="Username Required"), Length(min=4, max=25, message="Do not meet the requirements")])
-    password = PasswordField('password', validators=[InputRequired(message="Password Required"), Length(min=4, max=25, message="Do not meet the requirements")])
-    confirm_pswd = PasswordField('confirm_pswd', validators=[InputRequired(message="Username Required"), EqualTo('password', message="Password do not match")])
-    submit_button = SubmitField('Create')
+    username = StringField('username', validators=[InputRequired(message="Username required"), Length(min=4, max=25, message="Username must be between 4 and 25 characters")])
+    password = PasswordField('password', validators=[InputRequired(message="Password required"), Length(min=4, max=25, message="Password must be between 4 and 25 characters")])
+    confirm_pswd = PasswordField('confirm_pswd', validators=[InputRequired(message="Password required"), EqualTo('password', message="Passwords must match")])
 
     def validate_username(self, username):
         user_object = User.query.filter_by(username=username.data).first()
         if user_object:
-            raise ValidationError("Username has been taken")
+            raise ValidationError("Username already exists. Select a different username.")
 
 class LoginForm(FlaskForm):
-    """ Login Form """
+    """ Login form """
 
-    username = StringField('username', validators=[InputRequired(message="Username Required")])
-    password = PasswordField('password', validators=[InputRequired(message="Password Required"), invalid_credentials])
+    username = StringField('username', validators=[InputRequired(message="Username required")])
+    password = PasswordField('password', validators=[InputRequired(message="Password required"), invalid_credentials])
